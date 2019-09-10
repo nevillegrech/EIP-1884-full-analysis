@@ -1,5 +1,7 @@
 ## Full EIP-1884 contract-library.com analysis
 
+![gas is too damn high](https://opimedia.azureedge.net/-/media/Images/MEN/Editorial/Blogs/Ask-Our-Experts/Why-Is-Gas-Suddenly-So-Expensive/gas-prices1.gif?la=en&hash=78FE781F98614F6BC2135F56B4C5D85165DD32E5 "gas is too damn high :)")
+
 Contact @neville_grech on Twitter, @dedaub on Telegram in case of questions or comments
 
 ## [Background](https://github.com/holiman/eip-1884-security/blob/master/README.md#background)
@@ -81,7 +83,13 @@ Important reminder: The crowdsales above do not inherently _break_, it just mean
         require(total() + msg.value <= limit);
     }
 ```
-
+#### [Unknown Harvester with 5 ETH](https://contract-library.com/contracts/Ethereum/0x1347bb1cef4bf0db92294c1b52a22f190eaa04ac)
+```js
+  require((msg.value >= stor___function_selector__));
+  emit 0xafd096c64445a293507447c2ecb78f03b4f5459ec28b8e9bfe113c35b75d624a(address(msg.sender), msg.value, 0x447);
+  exit();
+```
+No source code available. Note that this contract would work if `LOGx` gas cost is reduced.
 
 #### [Aragon's DepositableDelegateProxy](https://contract-library.com/contracts/Ethereum/0x0a74d136fafed0f8d58ce4b7307283695ec7a0b6)
 ```js
@@ -104,8 +112,7 @@ Important reminder: The crowdsales above do not inherently _break_, it just mean
     }
 }
 ```
-According to the contract library analysis, the fallback function may fail due to anywhere between 2308 and 2438 gas.
-- [Issue at Aragon](https://github.com/aragon/aragonOS/issues/549)
+Note that this contract would work if `LOGx` gas cost is reduced. According to the contract library analysis, the fallback function may fail due to anywhere between 2308 and 2438 gas. [Issue at Aragon](https://github.com/aragon/aragonOS/issues/549)
 
 ## How does the static analysis on contract-library.com work?
 
