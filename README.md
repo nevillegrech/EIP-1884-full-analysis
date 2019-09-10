@@ -1,6 +1,6 @@
 ## Full EIP-1884 contract-library analysis
 
-- Please contact @neville_grech on Twitter, @dedaub on Telegram in case of questions or comments
+Contact @neville_grech on Twitter, @dedaub on Telegram in case of questions or comments
 
 ### [Background](https://github.com/holiman/eip-1884-security/blob/master/README.md#background)
 
@@ -14,13 +14,12 @@ Due to a fixed gas limit imposed by the `.send(..)` and `.transfer(..)` Solidity
 use these opcodes may now start to fail due to an out-of-gas exception.
 
 ### Our analysis
-Contract-library.com, our automated security service, performs sophisticated static analysis on all deployed smart contracts (over 20 million of them). As static analysis is a technique to find all possible program executions, if correctly implemented, it is bound to find the most comprehensive list of smart contracts affected by security vulnerabilities.
+Contract-library.com, an automated security service, performs sophisticated static analysis on all deployed smart contracts (over 20 million of them). As static analysis is a technique to find all possible program executions, if correctly implemented, it is bound to find the most comprehensive list of smart contracts affected by security vulnerabilities.
 
-On Friday August 16th Martin Holst Swende asked a question on the ETHSecurity channel on telegram about how to go about finding smart contracts that may fail the fallback function due to the EIP-1884. Since contract-library.com already had gas consumption analysis built into its core static analyses so we reached out with a list of contracts (constantly updated) that may be affected that same day:
+On Friday August 16th Martin Holst Swende from the Ethereum foundation asked a question on the ETHSecurity channel on telegram about how to go about finding smart contracts that may fail the fallback function due to the EIP-1884. Since contract-library.com already had gas consumption analysis built into its core static analyses so we reached out with a [list of contracts](https://contract-library.com/?w=FALLBACK_WILL_FAIL) (constantly updated) that may be affected that same day.
 
-https://contract-library.com/?w=FALLBACK_WILL_FAIL
 
-Over the subsequent days, with the input of Martin Holst Swende, the gas cost analysis computation was updated and many of its deficencies fixed. The analysis revealed over 800 contracts that are highly likely to fail if called with 2300 gas (whereas they would succeed prior to EIP-1884). [A subsequent, sounder, analysis](https://contract-library.com/?w=FALLBACK_MAY_FAIL) was also developed. This would be the most comprehensive list of affected smart contracts for this particular issue, but also contains many false positives. This sounder "may" analysis revealed that 7000 currently deployed smart contracts may fail under some execution paths with 2300 gas.
+Over the subsequent days, also with the input of Martin Holst Swende, the gas cost analysis computation was updated and many of its deficencies fixed. The analysis currently reveals over 800 contracts that are highly likely to fail if called with 2300 gas (whereas they would succeed prior to EIP-1884). [A subsequent, sounder, analysis](https://contract-library.com/?w=FALLBACK_MAY_FAIL) was also developed. This would be the most comprehensive list of affected smart contracts for this particular issue, but also contains many false positives. This sounder "may" analysis revealed that 7000 currently deployed smart contracts may fail under some execution paths with 2300 gas.
 
 In addition, since our analysis is fully automated, we have also performed experiments to see whether these issues can be simply avoided by repricing the `LOG0, LOG1 ...` opcodes. Note that these opcodes tend to happen quite often in fallback functions. By halving the `$G_{log}$` and `$G_{logtopic}$` gas costs, [the number of flagged contracts is reduced by approximately 25%](https://contract-library.com/?w=FALLBACK_WILL_FAIL%20(cheap%20LOG))
 
@@ -33,11 +32,10 @@ A more interesting, but more serious side-effect of EIP-1884 and EIP-2200 *combi
 attacker to perform an *unbounded mass iteration* attack, which is currently quite high. This attack is described in 
 [MadMax](https://www.nevillegrech.com/assets/pdf/madmax-oopsla18.pdf). More specifically, it makes the attack 
 7 times cheaper, rendering it much more feasible. This attack requires 2 SSTOREs per array element that is added by
-the attacker, which is then iterated upon by the victim, requiring an additional SLOAD. [For a list of contracts that may be susceptable to unbounded iteration, we have you covered.](https://contract-library.com/?w=DoS%20(Unbounded%20Operation)) The list contains approximately 15k contracts.
+the attacker, which is then iterated upon by the victim, requiring an additional SLOAD. For a list of contracts that may be susceptable to unbounded iteration, [we have you covered](https://contract-library.com/?w=DoS%20(Unbounded%20Operation)). The list contains approximately 15k contracts.
 
-If you would like to see whether the contract you are developing may be affected, deploy it to one of the Ethereum testnets and check your results at contract-library.com.
-
-## Can you show me examples of smart contracts on this list?
+## Which contracts will be affacted? Will mine be??
+If your contract is not [on this list]((https://contract-library.com/?w=FALLBACK_MAY_FAIL)) or [this list](https://contract-library.com/?w=DoS%20(Unbounded%20Operation)), then you'll be fine. If it is, you may still be fine, it might be a false positive but further investigation is necessary. If you would like to see whether the contract you are developing may be affected, deploy it to one of the Ethereum testnets and check your results at contract-library.com later.
 
 #### [KyberNetwork](https://contract-library.com/contracts/Ethereum/0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950)
 ```js
