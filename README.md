@@ -21,7 +21,7 @@ On Friday August 16th Martin Holst Swende from the Ethereum foundation asked a q
 
 Over the subsequent days, also with the input of Martin Holst Swende, the gas cost analysis computation was updated and many of its deficencies fixed. The analysis currently reveals over 800 contracts that are highly likely to fail if called with 2300 gas (whereas they would succeed prior to EIP-1884). [A subsequent, sounder, analysis](https://contract-library.com/?w=FALLBACK_MAY_FAIL) was also developed. This would be the most comprehensive list of affected smart contracts for this particular issue, but also contains many false positives. This sounder "may" analysis revealed that 7000 currently deployed smart contracts may fail under some execution paths with 2300 gas.
 
-In addition, since our analysis is fully automated, we have also performed experiments to see whether these issues can be simply avoided by repricing the `LOG0, LOG1 ...` opcodes. Note that these opcodes tend to happen quite often in fallback functions. By halving the `$G_{log}$` and `$G_{logtopic}$` gas costs, [the number of flagged contracts is reduced by approximately 25%](https://contract-library.com/?w=FALLBACK_WILL_FAIL%20(cheap%20LOG))
+In addition, since our analysis is fully automated, we have also performed experiments to see whether these issues can be simply avoided by repricing the `LOG0, LOG1 ...` opcodes. Note that these opcodes tend to happen quite often in fallback functions. By halving the `Glog` and `$Glogtopic` gas costs (refer to [yellow paper](https://ethereum.github.io/yellowpaper/paper.pdf)), [the number of flagged contracts is reduced by approximately 25%](https://contract-library.com/?w=FALLBACK_WILL_FAIL%20(cheap%20LOG))
 
 Although repricing opcodes can always break contracts, the EVM should be able to evolve too. Clearly, a decent number of
 contracts will be broken due to this change, so care must be taken to lessen the impact on the overall ecosystem.
@@ -35,7 +35,7 @@ attacker to perform an *unbounded mass iteration* attack, which is currently qui
 the attacker, which is then iterated upon by the victim, requiring an additional SLOAD. For a list of contracts that may be susceptable to unbounded iteration, [we have you covered](https://contract-library.com/?w=DoS%20(Unbounded%20Operation)). The list contains approximately 15k contracts.
 
 ## Which contracts will be affacted? Will mine be??
-If your contract is not [on this list]((https://contract-library.com/?w=FALLBACK_MAY_FAIL)) or [this list](https://contract-library.com/?w=DoS%20(Unbounded%20Operation)), then you'll be fine. If it is, you may still be fine, it might be a false positive but further investigation is necessary. If you would like to see whether the contract you are developing may be affected, deploy it to one of the Ethereum testnets and check your results at contract-library.com later.
+If your contract is not [on this list](https://contract-library.com/?w=FALLBACK_MAY_FAIL)) or [this list](https://contract-library.com/?w=DoS%20(Unbounded%20Operation)), then you're most probably fine. If it is, you may still be fine, further investigation is necessary. If you would like to see whether the contract you are developing may be affected, deploy it to one of the Ethereum testnets and check your results at contract-library.com later.
 
 #### [KyberNetwork](https://contract-library.com/contracts/Ethereum/0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950)
 ```js
