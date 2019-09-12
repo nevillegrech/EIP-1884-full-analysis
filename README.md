@@ -12,7 +12,7 @@ Contact @neville_grech on Twitter, @dedaub on Telegram in case of questions or c
 - increases the cost of `BALANCE` and `EXTCODEHASH` from `400` to `700` gas
 - adds a new opcode `SELFBALANCE` with cost `5`.
 
-Due to a fixed gas limit imposed by the `.send(..)` and `.transfer(..)` Solidity functions, fallback functions that
+Due to a fixed gas limit (2300) imposed by the `.send(..)` and `.transfer(..)` Solidity functions, fallback functions that
 use these opcodes may now start to fail due to an out-of-gas exception.
 
 ## Analysis by Contract-library.com team
@@ -34,6 +34,8 @@ A more interesting, but *perhaps equally serious side-effect* of EIP-1884 and [E
 
 ## Which contracts will be affected? What about the one I'm currently developing?
 If your contract does not [have fallbacks which may fail with 2300 gas](https://contract-library.com/?w=FALLBACK_MAY_FAIL)) or is not [susceptible to unbounded iteration](https://contract-library.com/?w=DoS%20(Unbounded%20Operation)), then you're most probably fine. If it is, you may still be ok, but further investigation is necessary. If you would like to see whether the contract you are developing may be affected, deploy it to one of the Ethereum testnets and check your results at contract-library.com.
+
+Below are sample contracts with a non-zero Ether balance that are affected by the repricing of SLOAD operations, so that their fallback is no longer runnable under the `send`/`transfer` gas allowance of 2300.
 
 #### [KyberNetwork](https://contract-library.com/contracts/Ethereum/0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950)
 ```js
@@ -73,7 +75,7 @@ For NEXXO, it checks three slots, `icoStartDate`, `icoEndDate` and `stopped`, to
   }
 
 ```
-Important reminder: The crowdsales above do not inherently _break_, it just means that callers need to add some more gas than `2300` to partake in the ICO contracts. 
+Important reminder: The crowdsales above do not inherently _break_, it just means that callers need to add some more gas than 2300 to partake in the ICO contracts. 
 
 
 #### [CappedVault](https://contract-library.com/contracts/Ethereum/0x91b9d2835ad914bc1dcfe09bd1816febd04fd689)
@@ -112,13 +114,13 @@ No source code available. Note that this contract would work if `LOGx` gas cost 
     }
 }
 ```
-Note that this contract would work if `LOGx` gas cost is reduced. According to the contract library analysis, the fallback function may fail due to anywhere between 2308 and 2438 gas. [Issue at Aragon](https://github.com/aragon/aragonOS/issues/549)
+Note that this contract would work if `LOGx` gas cost is reduced. According to the contract-library analysis, the fallback function may fail due to anything between 2308 and 2438 gas. [Issue at Aragon](https://github.com/aragon/aragonOS/issues/549)
 
 ## How does the static analysis on contract-library.com work?
 
-Static program analysis is a technique that considers all program's behaviors without having to execute the program. Static analysis is generally thought to be expensive, but over the years we have developed techniques to counter this. Firstly, we developed new techniques in the area of "declarative program analysis", which simplifies implementations and make these analysis simpler. Secondly, we have applied our analysis at scale, which makes them worth the effort. Contract-library's internal analysis framework decompiles all smart contracts on the main Ethereum network and testnets to an IR representation, ameanable to analysis. The decompilation framework is described in our [ICSE 2019 paper](https://www.nevillegrech.com/assets/pdf/gigahorse-icse.pdf). Following this analysis, many "client analysis", are applied. These analyses all benefit from a rich suite of analysis primitives, such as gas cost analysis (similar to worst-case execution analysis), memory contents analysis, etc. that are instantiated and customized in each client analysis. Finally, we encode all our analysis, decompilers, etc. in a declarative language, and automatically synthesize a fast C++ implementation using [Soufflé](https://souffle-lang.github.io/).
+Static program analysis is a technique that considers all of a program's behaviors without having to execute the program. Static analysis is generally thought to be expensive, but over the years we have developed techniques to counter this. Firstly, we developed new techniques in the area of "declarative program analysis", which simplifies analysis implementations. Secondly, we have applied our analyses at scale, which makes them worth the effort. Contract-library's internal analysis framework decompiles all smart contracts on the main Ethereum network and most popular testnets to an IR representation, amenable to analysis. The decompilation framework is described in a [2019 research paper](https://www.nevillegrech.com/assets/pdf/gigahorse-icse.pdf). Following this analysis, many "client analyses", are applied. These analyses all benefit from a rich suite of analysis primitives, such as gas cost analysis (similar to worst-case execution analysis), memory contents analysis, etc. These are instantiated and customized in each client analysis. Finally, we encode all our analyses, decompilers, etc. in a declarative language, and automatically synthesize a fast C++ implementation using [Soufflé](https://souffle-lang.github.io/).
 
-The `FALLBACK_WILL_FAIL` static analysis is encoded in the following *simplified* datalog spec, deployed on contract-library.com:
+For illustration, the `FALLBACK_WILL_FAIL` static analysis is encoded in the following *simplified* datalog spec, deployed on contract-library.com:
 
 ```prolog
 % Restrict the edges that form the possible paths to those in fallback functions
