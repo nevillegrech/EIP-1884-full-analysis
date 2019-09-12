@@ -8,9 +8,9 @@ Contact @neville_grech on Twitter, @dedaub on Telegram in case of questions or c
 
 [EIP 1884](https://eips.ethereum.org/EIPS/eip-1884) is set to be implemented into the upcoming Ethereum 'Istanbul' hard fork. It:
 
-- increases the cost of opcode `SLOAD` from `200` to `800` gas
-- increases the cost of `BALANCE` and `EXTCODEHASH` from `400` to `700` gas
-- adds a new opcode `SELFBALANCE` with cost `5`.
+- increases the cost of opcode `SLOAD` from 200 to 800 gas
+- increases the cost of `BALANCE` and `EXTCODEHASH` from 400 to 700 gas
+- adds a new opcode `SELFBALANCE` with cost 5.
 
 Due to a fixed gas limit (2300) imposed by the `.send(..)` and `.transfer(..)` Solidity functions, fallback functions that
 use these opcodes may now start to fail due to an out-of-gas exception.
@@ -35,7 +35,7 @@ A more interesting, but *perhaps equally serious side-effect* of EIP-1884 and [E
 ## Which contracts will be affected? What about the one I'm currently developing?
 If your contract does not [have fallbacks which may fail with 2300 gas](https://contract-library.com/?w=FALLBACK_MAY_FAIL)) or is not [susceptible to unbounded iteration](https://contract-library.com/?w=DoS%20(Unbounded%20Operation)), then you're most probably fine. If it is, you may still be ok, but further investigation is necessary. If you would like to see whether the contract you are developing may be affected, deploy it to one of the Ethereum testnets and check your results at contract-library.com.
 
-Below are sample contracts with a non-zero Ether balance that are affected by the repricing of SLOAD operations, so that their fallback is no longer runnable under the `send`/`transfer` gas allowance of 2300.
+Below are sample contracts with a non-zero Ether balance that are affected by the repricing of `SLOAD` operations, so that their fallback is no longer runnable under the `send`/`transfer` gas allowance of 2300.
 
 #### [KyberNetwork](https://contract-library.com/contracts/Ethereum/0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950)
 ```js
